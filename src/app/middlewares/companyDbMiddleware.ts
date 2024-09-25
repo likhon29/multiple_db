@@ -7,27 +7,34 @@ interface CustomRequest extends Request {
     companyDb?: any;
 }
 
+// In-memory cache for storing database connections
+const dbConnections: { [key: string]: any } = {};
 
-const companies = [
-    {
-        id: 1,
-        name: 'ABC Company',
-        email: 'test@gmal.com',
-        dbName: 'company1',
-    },
-    {
-        id: 2,
-        name: 'XYZ Company',
-        email: 'b@gmail.com',
-        dbName: 'company2',
-    },
-    {
-        id: 3,
-        name: 'MNO Company',
-        email: 'mno@gmail.com',
-        dbName: 'company3',
-    }
-]
+const companies: {
+    id: number,
+    name: string,
+    email: string,
+    dbName: string,
+}[] = [
+        {
+            id: 1,
+            name: 'ABC Company',
+            email: 'test@gmal.com',
+            dbName: 'company1',
+        },
+        {
+            id: 2,
+            name: 'XYZ Company',
+            email: 'b@gmail.com',
+            dbName: 'company2',
+        },
+        {
+            id: 3,
+            name: 'MNO Company',
+            email: 'mno@gmail.com',
+            dbName: 'company3',
+        }
+    ]
 
 
 export const companyDbMiddleware = async (req: CustomRequest, res: Response, next: NextFunction) => {
@@ -41,22 +48,29 @@ export const companyDbMiddleware = async (req: CustomRequest, res: Response, nex
         // Fetch company details from the central database
         // const companyDetails = await CompanyModel.findOne({ companyId });
 
-        const companyDetails = companies.find((company) => company.id === Number(companyId));
+        const companyDetails = companies.find((company) => company.id === parseInt(companyId));
 
-        if (!companyDetails || !companyDetails.dbName) {
-            return res.status(404).json({ error: 'Company not found or database name missing' });
+        const dbName = companyDetails?.dbName;
+
+        if (!dbName) {
+            return res.status(400).json({ error: 'Database  not found for the given company ID' });
         }
 
-        // Construct the full database URI using the common MongoDB cluster URI and the company's database name
-        const companyDbURI = `${config.cluster_url}${companyDetails.dbName}?retryWrites=true&w=majority&appName=softcar`;
+        // Check if a connection for this company already exists
+        if (!dbConnections[dbName]) {
+            // If not, create a new connection and store it in the cache
+            const companyDbURI = `${config.cluster_url}${dbName}?retryWrites=true&w=majority&appName=softcar`;
+            console.log('Connecting to new Company DB URI:', companyDbURI);
 
+            // Connect to the company's specific database
+            const companyDbConnection = await connectCompanyDB(companyDbURI);
+            dbConnections[dbName] = companyDbConnection; // Cache the connection
+        } else {
+            console.log(`Using cached connection for company: ${companyDetails.name}`);
+        }
 
-        console.log('Company DB URI:', companyDbURI);
-
-
-        // Connect to the company's specific database
-        const companyDbConnection = await connectCompanyDB(companyDbURI);
-        req.companyDb = companyDbConnection;
+        // Set the connection to the request object
+        req.companyDb = dbConnections[dbName];
 
         next();
     } catch (error) {
