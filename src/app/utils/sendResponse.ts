@@ -13,6 +13,7 @@ type TResponse<T> = {
     message?: string;
     meta?: TMeta;
     data: T;
+    path?: string;
 };
 
 const sendResponse = <T>(req: Request, res: Response, data: TResponse<T>) => {

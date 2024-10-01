@@ -8,7 +8,6 @@ import globalErrorHandler from './app/middlewares/globalErrorhandler';
 import cookieParser from 'cookie-parser';
 import notFound from './app/middlewares/notFound';
 import router from './app/routes';
-import { companyDbMiddleware } from './app/middlewares/companyDbMiddleware';
 
 const app: Application = express();
 
@@ -26,7 +25,9 @@ app.get('/', (req: Request, res: Response) => {
 
 // app.use(companyDbMiddleware);
 // application routes
-app.use('/api/v1', router);
+
+app.use('/api', router);
+
 
 
 

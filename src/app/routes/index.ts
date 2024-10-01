@@ -1,15 +1,14 @@
-import { Router } from "express";
-import { CompanyRoutes } from "../modules/global/company";
+import { Router } from 'express';
+
+const versionedRoutes = [
+    { version: 'v1', router: require('./v1').default },
+    { version: 'v2', router: require('./v2').default },
+];
 
 const router = Router();
 
-const moduleRoutes: any[] = [
-    {
-        path: "/company",
-        route: CompanyRoutes,
-    }
-];
-
-moduleRoutes.forEach((route) => router.use(route.path, route.route));
+versionedRoutes.forEach(({ version, router: route }) => {
+    router.use(`/${version}`, route);
+});
 
 export default router;
