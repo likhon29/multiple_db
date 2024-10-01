@@ -12,7 +12,12 @@ async function main() {
     try {
         // connectCentralDB();
 
-        await mongoose.connect(config.central_db_uri as string);
+        if (!config.central_db_name) {
+            throw new Error("Central DB name is not defined in the configuration.");
+        }
+        const db = config.cluster_url + config.central_db_name + '?retryWrites=true&w=majority' + '&appName=cluster0';
+
+        await mongoose.connect(db);
         server = app.listen(config.port, () => {
             console.log(`Central DB: Server running on port ${config.port}`);
         }
