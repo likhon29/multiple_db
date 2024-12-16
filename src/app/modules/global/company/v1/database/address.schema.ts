@@ -1,7 +1,7 @@
 import { Schema } from "mongoose";
-import { TCompanyAddress } from "../rest";
+// import { TCompanyAddress } from "../rest";
 
-export const addressSchema = new Schema<TCompanyAddress>({
+export const addressSchema = new Schema<any>({
     address: {
         type: String,
         required: true

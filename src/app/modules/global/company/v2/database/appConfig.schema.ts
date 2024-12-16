@@ -1,5 +1,4 @@
 import { Schema } from "mongoose";
-import { TAppConfig } from "../rest";
 
 
 // export const appConfigSchema = new Schema({
@@ -20,7 +19,7 @@ import { TAppConfig } from "../rest";
 
 
 
-export const appConfigSchema = new Schema<TAppConfig>({
+export const appConfigSchema = new Schema<any>({
     appName: { type: String, required: true },  // Not Null
     logo: { type: String, required: true },  // Not Null
     primaryColor: { type: String, required: true },  // Not Null
@@ -39,5 +38,5 @@ export const appConfigSchema = new Schema<TAppConfig>({
     analyticsConfig: { type: Object },  // Optional
 
 }, {
-    timestamps: true  // Automatically adds createdAt and updatedAt timestamps
+    timestamps: false  // Automatically adds createdAt and updatedAt timestamps
 });
